@@ -31,18 +31,24 @@
 #endif
 
 #include "mainwindow.h"
+#include "CTabWidget/CTabWidget.h"
+#include "CTabWidget/CTabBar.h"
+#include "CTabWidget/CWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    m_pTabWidget = new QTabWidget(this);
-    m_pTextEdit = new TextEditor(this);
+    m_pTabWidget = new CTabWidget(this);
+    m_pTextEdit = new TextEditor(m_pTabWidget);
     m_pTextEdit->setUtf8(true);
 
     this->setCentralWidget(m_pTabWidget);
 
+    m_pTabWidget->setMovable(true);
     m_pTabWidget->setTabsClosable(true);
     m_pTabWidget->addTab(m_pTextEdit, tr("First"));
+    m_pTabWidget->addTab(new TextEditor(m_pTabWidget), tr("Second"));
+    m_pTabWidget->addTab(new TextEditor(m_pTabWidget), tr("Third"));
 
 
     m_pTextEdit->setFocus();
@@ -86,6 +92,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // connect(textEdit, &TextEditor::textChanged,
     //         this, &MainWindow::showSizeLines);
+
+    connect(m_pTabWidget->tabBar, &CTabBar::STabDrag, this, slotTabDrag);
+    connect(m_pTabWidget, &CTabWidget::tabCloseRequested, this, slotCloseTab);
+    connect(m_pTabWidget, &CTabWidget::currentChanged, m_pTabWidget, &CTabWidget::setCurrentIndex);
 }
 
 MainWindow::~MainWindow()
@@ -965,6 +975,55 @@ void MainWindow::showSizeLines()
 void MainWindow::showCursorPosition(int line, int index)
 {
     rowColumnLabel->setText(tr("Ln : %1   Col : %2").arg(line + 1).arg(index));
+}
+
+void MainWindow::slotTabBarDoubleClicked()
+{
+    CWidget *widget = qobject_cast<CWidget*>(sender());
+    QObjectList list = widget->children();
+    TextEditor *edit = nullptr;
+
+    for(int i = 0;i<list.count();++i)
+    {
+        if(list[i]->inherits("TextEditor"))
+        {
+            edit = qobject_cast<TextEditor*>(list[i]);
+            break;
+        }
+    }
+    if(edit == nullptr)
+    {
+        return;
+    }
+
+    edit->setParent(m_pTabWidget);
+    m_pTabWidget->addTab(edit, widget->windowTitle());
+    delete widget;
+}
+
+void MainWindow::slotTabDrag(int index, QPoint point)
+{
+    CWidget *widget = new CWidget;
+    QWidget *draged = m_pTabWidget->widget(index);
+    QString windowName = m_pTabWidget->tabText(index);
+    m_pTabWidget->removeTab(index);
+    connect(widget, &CWidget::SDoubleClickedTitleBar, this, slotTabBarDoubleClicked);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(draged);
+    widget->setLayout(layout);
+    widget->resize(600, 400);
+    widget->move(point+pos()+m_pTabWidget->pos());
+    widget->setWindowTitle(windowName);
+    widget->show();
+    draged->show();
+}
+
+void MainWindow::slotCloseTab(int index)
+{
+    QWidget *draged = m_pTabWidget->widget(index);
+    m_pTabWidget->removeTab(index);
+    delete draged;
 }
 
 void MainWindow::slotCopyAvailable(bool enabled)

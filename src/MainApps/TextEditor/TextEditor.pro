@@ -44,7 +44,10 @@ SOURCES += \
     mainwindow.cpp \
     my_plug-in/md5widget.cpp \
     my_plug-in/finddialog.cpp \
-    my_plug-in/md5filewidget.cpp
+    my_plug-in/md5filewidget.cpp \
+    CTabWidget/CTabBar.cpp \
+    CTabWidget/CTabWidget.cpp \
+    CTabWidget/CWidget.cpp
 
 HEADERS += \
         texteditor.h \
@@ -52,7 +55,10 @@ HEADERS += \
     my_plug-in/md5widget.h \
     my_plug-in/myheaders.h \
     my_plug-in/finddialog.h \
-    my_plug-in/md5filewidget.h
+    my_plug-in/md5filewidget.h \
+    CTabWidget/CTabBar.h \
+    CTabWidget/CTabWidget.h \
+    CTabWidget/CWidget.h
 
 FORMS += \
     my_plug-in/md5filewidget.ui

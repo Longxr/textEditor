@@ -18,6 +18,7 @@ class QTabWidget;
 class QCloseEvent;
 class FindDialog;
 class QPrinter;
+class CTabWidget;
 QT_END_NAMESPACE
 
 enum EndOfLine
@@ -84,6 +85,10 @@ private slots:
     // 更新当前光标所在的行列号
     void showCursorPosition(int line, int index);
 
+    void slotTabBarDoubleClicked();
+    void slotTabDrag(int index, QPoint point);
+    void slotCloseTab(int index);
+
 private:
     // 当前文件名
     QString curFile;            // 带有路径的文件名 eg：C:\test\test.txt
@@ -91,7 +96,7 @@ private:
     QStringList recentFiles;    // recentFiles文件名存储格式与curFile一致
     // 主编辑界面
     TextEditor* m_pTextEdit      = nullptr;
-    QTabWidget* m_pTabWidget     = nullptr;
+    CTabWidget* m_pTabWidget     = nullptr;
     // 查找对话框
     FindDialog* findDialog       = nullptr;
     MD5Widget* md5Widget         = nullptr;
